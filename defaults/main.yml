@@ -1,0 +1,13 @@
+---
+# defaults file for hdp-instances
+
+image: ami-7abd0209    # CentOS 7 image
+utility_instance_type: t2.nano
+master1_instance_type: t2.nano
+master2_instance_type: t2.nano
+worker_instance_type: t2.nano
+worker_count: 3
+region: eu-west-1
+key_name: hdp
+security_group: default
+launch_second_master: False

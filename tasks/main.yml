@@ -1,0 +1,128 @@
+# tasks file for hdp-instances
+---
+- block:
+   - name: launch utility
+     ec2:
+       image: "{{ image }}"
+       region: "{{ region }}"
+       instance_type: "{{ utility_instance_type }}"
+       key_name: "{{ key_name }}"
+       group: "{{ security_group }}"
+       instance_tags: { Name: hdp-utility, type: utility, env: test, purpose: hdp }
+       wait: true
+       volumes:
+         - device_name: /dev/xvda
+           volume_type: gp2
+           volume_size: 20
+         - device_name: /dev/sdb
+           ephemeral: ephemeral0
+       vpc_subnet_id: subnet-3cfe6d59
+       assign_public_ip: yes
+       exact_count: 1
+       count_tag: {type: utility}
+     register: utility_node
+
+   - name: add new utility instance to host group
+     add_host:
+       hostname: "{{ item.public_dns_name }}"
+       groupname:
+         - utility
+         - hdp
+     with_items: "{{ utility_node.instances }}"
+
+   - name: launch master1
+     ec2:
+       image: "{{ image }}"
+       region: "{{ region }}"
+       instance_type: "{{ master1_instance_type }}"
+       key_name: "{{ key_name }}"
+       group: "{{ security_group }}"
+       instance_tags: { Name: hdp-master1, type: master1, env: test, purpose: hdp }
+       wait: true
+       volumes:
+         - device_name: /dev/xvda
+           volume_type: gp2
+           volume_size: 20
+         - device_name: /dev/sdb
+           ephemeral: ephemeral0
+       vpc_subnet_id: subnet-3cfe6d59
+       assign_public_ip: yes
+       exact_count: 1
+       count_tag: {type: master1}
+     register: master1_node
+
+   - name: add new master1 instance to host group
+     add_host:
+       hostname: "{{ item.public_dns_name }}"
+       groupname:
+         - master1
+         - hdp
+     with_items: "{{ master1_node.instances }}"
+
+   - name: launch master2
+     ec2:
+       image: "{{ image }}"
+       region: "{{ region }}"
+       instance_type: "{{ master2_instance_type }}"
+       key_name: "{{ key_name }}"
+       group: "{{ security_group }}"
+       instance_tags: { Name: hdp-master2, type: master2, env: test, purpose: hdp }
+       wait: true
+       volumes:
+         - device_name: /dev/xvda
+           volume_type: gp2
+           volume_size: 20
+         - device_name: /dev/sdb
+           ephemeral: ephemeral0
+       vpc_subnet_id: subnet-3cfe6d59
+       assign_public_ip: yes
+       exact_count: 1
+       count_tag: {type: master2}
+     register: master2_node
+     when: launch_second_master
+
+   - name: add new master2 instance to host group
+     add_host:
+       hostname: "{{ item.public_dns_name }}"
+       groupname:
+         - master2
+         - hdp
+     with_items: "{{ master2_node.instances | default([]) }}"
+     when: launch_second_master
+
+   - name: launch worker
+     ec2:
+       image: "{{ image }}"
+       region: "{{ region }}"
+       instance_type: "{{ worker_instance_type }}"
+       key_name: "{{ key_name }}"
+       group: "{{ security_group }}"
+       instance_tags: { Name: hdp-worker, type: worker, env: test, purpose: hdp }
+       wait: true
+       volumes:
+         - device_name: /dev/xvda
+           volume_type: gp2
+           volume_size: 20
+         - device_name: /dev/sdb
+           ephemeral: ephemeral0
+       vpc_subnet_id: subnet-3cfe6d59
+       assign_public_ip: yes
+       exact_count: "{{ worker_count }}"
+       count_tag: {type: worker}
+     register: worker_node
+
+   - name: add new worker instance to host group
+     add_host:
+       hostname: "{{ item.public_dns_name }}"
+       groupname:
+         - worker
+         - hdp
+     with_items: "{{ worker_node.instances }}"
+     when: "{{ worker_node.instances }}"
+
+   - name: wait for SSH to come up
+     wait_for: host={{ item }} port=22 delay=2 timeout=320 state=started
+     with_items: "{{ groups.hdp }}" 
+
+  tags:
+    - ec2_setup
