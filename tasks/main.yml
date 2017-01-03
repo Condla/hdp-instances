@@ -14,8 +14,10 @@
          - device_name: /dev/xvda
            volume_type: gp2
            volume_size: 20
+           delete_on_termination: true
          - device_name: /dev/sdb
            ephemeral: ephemeral0
+           delete_on_termination: true
        vpc_subnet_id: subnet-3cfe6d59
        assign_public_ip: yes
        exact_count: 1
@@ -43,8 +45,10 @@
          - device_name: /dev/xvda
            volume_type: gp2
            volume_size: 20
+           delete_on_termination: true
          - device_name: /dev/sdb
            ephemeral: ephemeral0
+           delete_on_termination: true
        vpc_subnet_id: subnet-3cfe6d59
        assign_public_ip: yes
        exact_count: 1
@@ -72,8 +76,10 @@
          - device_name: /dev/xvda
            volume_type: gp2
            volume_size: 20
+           delete_on_termination: true
          - device_name: /dev/sdb
            ephemeral: ephemeral0
+           delete_on_termination: true
        vpc_subnet_id: subnet-3cfe6d59
        assign_public_ip: yes
        exact_count: 1
@@ -103,8 +109,10 @@
          - device_name: /dev/xvda
            volume_type: gp2
            volume_size: 20
+           delete_on_termination: true
          - device_name: /dev/sdb
            ephemeral: ephemeral0
+           delete_on_termination: true
        vpc_subnet_id: subnet-3cfe6d59
        assign_public_ip: yes
        exact_count: "{{ worker_count }}"
@@ -121,8 +129,10 @@
      when: "{{ worker_node.instances }}"
 
    - name: wait for SSH to come up
-     wait_for: host={{ item }} port=22 delay=2 timeout=320 state=started
-     with_items: "{{ groups.hdp }}" 
+     wait_for: host={{ item }} port=22 delay=20 timeout=100 state=started
+     with_items: "{{ groups.hdp }}"
+
+
 
   tags:
     - ec2_setup
