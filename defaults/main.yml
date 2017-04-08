@@ -3,8 +3,9 @@
 
 image: ami-7abd0209    # CentOS 7 image
 utility_instance_type: t2.nano
-master1_instance_type: t2.nano
-master2_instance_type: t2.nano
+utility_count: 1
+master_instance_type: t2.nano
+master_count: 1
 worker_instance_type: t2.nano
 worker_count: 3
 region: eu-west-1
