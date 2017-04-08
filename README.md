@@ -1,11 +1,13 @@
 HDP Instances
 =========
 
-hdp-instances is an Ansible role to create cloud infrastructure to be used for
+hdp-instances is a role to create cloud infrastructure to be used for
 an installation of an HDP cluster.
 
 Requirements
 ------------
+
+* AWS account, key and 
 
 
 Role Variables
@@ -18,6 +20,8 @@ Dependencies
 
 Example Playbook
 ----------------
+
+An example playbook where several roles 
 
 
 License
