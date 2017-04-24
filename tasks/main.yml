@@ -24,7 +24,10 @@
        count_tag: {type: utility}
      register: utility_node
 
-   - name: add new utility instance to host group
+   - name: wait
+     pause: prompt=no seconds=2
+
+   - name: add new utility instances to host group
      add_host:
        hostname: "{{ item.public_dns_name }}"
        groupname:
@@ -36,7 +39,7 @@
      ec2:
        image: "{{ image }}"
        region: "{{ region }}"
-       instance_type: "{{ master1_instance_type }}"
+       instance_type: "{{ master_instance_type }}"
        key_name: "{{ key_name }}"
        group: "{{ security_group }}"
        instance_tags: { Name: hdp-master, type: master, env: test, purpose: hdp }
@@ -53,9 +56,12 @@
        assign_public_ip: yes
        exact_count: "{{ master_count }}"
        count_tag: {type: master}
-     register: master1_node
+     register: master_node
+     
+   - name: wait
+     pause: prompt=no seconds=2
 
-   - name: add new master1 instance to host group
+   - name: add new master instances to host group
      add_host:
        hostname: "{{ item.public_dns_name }}"
        groupname:
@@ -86,7 +92,10 @@
        count_tag: {type: worker}
      register: worker_node
 
-   - name: add new worker instance to host group
+   - name: wait
+     pause: prompt=no seconds=2
+
+   - name: add new worker instances to host group
      add_host:
        hostname: "{{ item.public_dns_name }}"
        groupname:
@@ -96,11 +105,11 @@
      when: "{{ worker_node.instances }}"
 
    - name: wait for SSH to come up
-     wait_for: host={{ item }} port=22 delay=2 timeout=200 state=started
+     wait_for: host={{ item }} port=22 delay=2 timeout=500 state=started
      with_items: "{{ groups.hdp }}"
 
-   - name: wait 2 more seconds
-     pause: prompt=no seconds=2
+   - name: wait 5 more seconds
+     pause: prompt=no seconds=5
 
   tags:
     - ec2_setup
