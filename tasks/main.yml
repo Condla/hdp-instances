@@ -18,7 +18,7 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
        exact_count: 1
        count_tag: {type: utility}
@@ -49,7 +49,7 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
        exact_count: 1
        count_tag: {type: master1}
@@ -80,7 +80,7 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpn_subnet_id }}"
        assign_public_ip: yes
        exact_count: 1
        count_tag: {type: master2}
@@ -113,7 +113,7 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
        exact_count: "{{ worker_count }}"
        count_tag: {type: worker}
