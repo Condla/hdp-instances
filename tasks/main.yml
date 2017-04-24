@@ -1,7 +1,7 @@
 # tasks file for hdp-instances
 ---
 - block:
-   - name: launch utility
+   - name: launching utility nodes
      ec2:
        image: "{{ image }}"
        region: "{{ region }}"
@@ -18,9 +18,9 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
-       exact_count: 1
+       exact_count: "{{ utility_count }}"
        count_tag: {type: utility}
      register: utility_node
 
@@ -32,14 +32,14 @@
          - hdp
      with_items: "{{ utility_node.instances }}"
 
-   - name: launch master1
+   - name: launching master nodes
      ec2:
        image: "{{ image }}"
        region: "{{ region }}"
        instance_type: "{{ master1_instance_type }}"
        key_name: "{{ key_name }}"
        group: "{{ security_group }}"
-       instance_tags: { Name: hdp-master1, type: master1, env: test, purpose: hdp }
+       instance_tags: { Name: hdp-master, type: master, env: test, purpose: hdp }
        wait: false
        volumes:
          - device_name: /dev/sda1
@@ -49,20 +49,19 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
-       exact_count: 1
-       count_tag: {type: master1}
+       exact_count: "{{ master_count }}"
+       count_tag: {type: master}
      register: master1_node
 
    - name: add new master1 instance to host group
      add_host:
        hostname: "{{ item.public_dns_name }}"
        groupname:
-         - master1
+         - master
          - hdp
-     with_items: "{{ master1_node.instances }}"
-
+     with_items: "{{ master_node.instances }}"
 
    - name: launch worker
      ec2:
@@ -81,7 +80,7 @@
            #         - device_name: /dev/sdb
            #           ephemeral: ephemeral0
            #           delete_on_termination: true
-       vpc_subnet_id: subnet-3cfe6d59
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
        assign_public_ip: yes
        exact_count: "{{ worker_count }}"
        count_tag: {type: worker}
