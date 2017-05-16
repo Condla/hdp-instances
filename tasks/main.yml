@@ -34,7 +34,10 @@
          - utility
          - hdp
      with_items: "{{ utility_node.instances }}"
+   tags:
+     - utility_instances 
 
+- block:
    - name: launching master nodes
      ec2:
        image: "{{ image }}"
@@ -68,7 +71,10 @@
          - master
          - hdp
      with_items: "{{ master_node.instances }}"
+   tags:
+     - master_instances 
 
+- block:
    - name: launch worker
      ec2:
        image: "{{ image }}"
@@ -103,13 +109,51 @@
          - hdp
      with_items: "{{ worker_node.instances }}"
      when: "{{ worker_node.instances }}"
-
-   - name: wait for SSH to come up
-     wait_for: host={{ item }} port=22 delay=2 timeout=500 state=started
-     with_items: "{{ groups.hdp }}"
-
-   - name: wait 5 more seconds
-     pause: prompt=no seconds=5
-
   tags:
-    - ec2_setup
+    - worker_instances
+    
+- block:
+   - name: launch edge
+     ec2:
+       image: "{{ image }}"
+       region: "{{ region }}"
+       instance_type: "{{ edge_instance_type }}"
+       key_name: "{{ key_name }}"
+       group: "{{ security_group }}"
+       instance_tags: { Name: hdp-edge, type: edge, env: test, purpose: hdp }
+       wait: false
+       volumes:
+         - device_name: /dev/sda1
+           volume_type: gp2
+           volume_size: 100
+           delete_on_termination: true
+           #         - device_name: /dev/sdb
+           #           ephemeral: ephemeral0
+           #           delete_on_termination: true
+       vpc_subnet_id: "{{ vpc_subnet_id }}"
+       assign_public_ip: yes
+       exact_count: "{{ edge_count }}"
+       count_tag: {type: edge}
+     register: edge_node
+
+   - name: wait
+     pause: prompt=no seconds=2
+
+   - name: add new edge instances to host group
+     add_host:
+       hostname: "{{ item.public_dns_name }}"
+       groupname:
+         - worker
+         - hdp
+     with_items: "{{ edge_node.instances }}"
+     when: "{{ edge_node.instances }}"
+  tags:
+    - edge_instances
+
+- name: wait for SSH to come up
+  wait_for: host={{ item }} port=22 delay=2 timeout=500 state=started
+  with_items: "{{ groups.hdp }}"
+
+- name: wait 5 more seconds
+  pause: prompt=no seconds=5
+
