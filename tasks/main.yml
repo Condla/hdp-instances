@@ -34,9 +34,9 @@
         - utility
         - hdp
     with_items: "{{ utility_node.instances }}"
-    
+
   tags:
-    - utility_instances 
+    - utility_instances
 
 - block:
   - name: launching master nodes
@@ -61,7 +61,7 @@
       exact_count: "{{ master_count }}"
       count_tag: {type: master}
     register: master_node
-    
+
   - name: wait
     pause: prompt=no seconds=2
 
@@ -73,7 +73,7 @@
         - hdp
     with_items: "{{ master_node.instances }}"
   tags:
-    - master_instances 
+    - master_instances
 
 - block:
   - name: launch worker
@@ -112,7 +112,7 @@
     when: "{{ worker_node.instances }}"
   tags:
     - worker_instances
-    
+
 - block:
   - name: launch edge
     ec2:
@@ -152,9 +152,8 @@
     - edge_instances
 
 - name: wait for SSH to come up
-  wait_for: host={{ item }} port=22 delay=2 timeout=500 state=started
+  wait_for: host={{ item }} port=22 delay=1 timeout=500 state=started
   with_items: "{{ groups.hdp }}"
 
 - name: wait 5 more seconds
   pause: prompt=no seconds=5
-
